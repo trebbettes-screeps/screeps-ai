@@ -38,8 +38,8 @@ export class ErrorMapper {
     while (match = re.exec(stack)) {
       if (match[2] === "main") {
         const pos = this.consumer.originalPositionFor({
-          line: parseInt(match[3], 10),
-          column: parseInt(match[4], 10)
+          column: parseInt(match[4], 10),
+          line: parseInt(match[3], 10)
         });
 
         if (pos.line != null) {
@@ -74,16 +74,13 @@ export class ErrorMapper {
         loop();
       } catch (e) {
         if (e instanceof Error) {
-          if ("sim" in Game.rooms) {
-            console.log(`<span style='color:red'>Source maps don't work in the simulator - displaying original error<br>${_.escape(e.stack)}</span>`)
-          } else {
-            console.log(`<span style='color:red'>${_.escape(this.sourceMappedStackTrace(e))}</span>`);
-          }
+          const error = ("sim" in Game.rooms) ? _.escape(e.stack) : _.escape(this.sourceMappedStackTrace(e));
+          console.log(`<span style='color:red'>${error}</span>`);
         } else {
           // can't handle it
           throw e;
         }
       }
-    }
+    };
   }
 }
