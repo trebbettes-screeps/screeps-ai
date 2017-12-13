@@ -24,7 +24,7 @@ interface SpawnRequest {
 /**
  * Options for the body generator.
  */
-interface GenerateBodyOptions {
+interface GenerateOptions {
     maxCost?: number;
     maxSize?: number;
     moveShield?: boolean;

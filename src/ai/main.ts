@@ -1,12 +1,14 @@
 import * as Movement from "./movement/index";
+import "./prototypes/index";
+import {manageRoom} from "./room/index";
+
 Movement.setConfig({
   calculateCarryWeight: true,
   trackHostileRooms: true
 });
 
 export const screepsAiLoop = () => {
-  console.log(`Tick: ${Game.time}`);
-
+  _.forEach(Game.rooms, manageRoom);
   memoryMaintenance();
 };
 

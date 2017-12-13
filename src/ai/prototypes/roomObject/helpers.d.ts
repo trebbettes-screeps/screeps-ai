@@ -1,0 +1,3 @@
+interface RoomObject {
+    isBlocking: () => boolean;
+}
