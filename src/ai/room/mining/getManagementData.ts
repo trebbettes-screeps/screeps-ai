@@ -9,7 +9,7 @@ export function getManagementData(room: Room, config?: MiningConfig): MiningMana
           lastChecked: 0,
           mine: room.find(FIND_SOURCES),
           opts: "",
-          oversee: [] as string[],
+          oversee: [],
           reserve: [],
           resources: []
         };
@@ -47,43 +47,36 @@ function serialiseConfig(c: MiningConfig): string {
     return `${c.maxMinerals}${c.maxSources}${c.takeSk}`;
 }
 
+function getSortedResources(room: Room, resources: ResourceInfo[]): ResourceInfo[]  {
+  return _(resources)
+    .filter((i: ResourceInfo) => i.destRoomName === room.name)
+    .groupBy("roomName")
+    .sortBy((ri: ResourceInfo[]) => {
+      if (ri[0].roomName === room.name) {
+        return 0;
+      }
+      return ri.length > 1 ? (_.sum(ri, "distance") / ri.length) - 10 : ri[0].distance + 10;
+    })
+    .flatten().value() as ResourceInfo[];
+}
+
 function generateManagementData(room: Room, config: MiningConfig): MiningManagementData {
-    const resources = findResources(room, config.takeSk);
-    const sortedRooms = _(resources)
-        .filter((i: ResourceInfo) => i.destRoomName === room.name)
-        .groupBy("roomName")
-        .sortBy((ri: ResourceInfo[]) => {
-            if (ri[0].roomName === room.name) {
-                return 0;
-            }
-            return ri.length > 1 ? (_.sum(ri, "distance") / ri.length) - 10 : ri[0].distance + 10;
-        }).value() as ResourceInfo[][];
-    const sources: ResourceInfo[] = [];
-    const minerals: ResourceInfo[] = [];
-    while ((sources.length < config.maxSources || minerals.length < config.maxMinerals) && sortedRooms.length) {
-        const set = sortedRooms.shift()!;
-        const required: number = config.maxSources - sources.length;
-        if (required) {
-            const nodes = _.filter(set, (i: ResourceInfo) => i.resourceType === RESOURCE_ENERGY).slice(0, required);
-            _.forEach(nodes, (i: ResourceInfo) => sources.push(i));
-        }
-        if (minerals.length < config.maxMinerals) {
-            const mineral = _.find(set, (i: ResourceInfo) => i.resourceType !== RESOURCE_ENERGY);
-            if (mineral) {
-                minerals.push(mineral);
-            }
-        }
-    }
-    const selectedResources = [...sources, ...minerals];
-    const allRooms = _(selectedResources)
-        .map<string>("roomName").uniq().value();
-    const remoteRooms = _.filter(allRooms, (n: string) => n !== room.name);
-    return {
-        defend: remoteRooms,
-        lastChecked: Game.time,
-        opts: serialiseConfig(config),
-        oversee: allRooms,
-        reserve: remoteRooms,
-        resources: _.map(selectedResources, "id")
-    };
+  const resources = findResources(room, config.takeSk);
+  const sortedResources = getSortedResources(room, resources);
+  const byType = _.groupBy(sortedResources, (ri) => ri.resourceType === RESOURCE_ENERGY ? RESOURCE_ENERGY : "other");
+
+  const sources = _.take(byType[RESOURCE_ENERGY], config.maxSources);
+  const minerals = _.take(byType[`other`], config.maxMinerals);
+  const selectedResources = [...sources, ...minerals];
+
+  const allRooms = _(selectedResources).map((ri) => ri.roomName).uniq().value();
+  const remoteRooms = _.filter(allRooms, (n: string) => n !== room.name);
+  return {
+      defend: remoteRooms,
+      lastChecked: Game.time,
+      opts: serialiseConfig(config),
+      oversee: allRooms,
+      reserve: remoteRooms,
+      resources: _.map(selectedResources, "id")
+  };
 }
