@@ -1,9 +1,9 @@
 import {generateBody} from "./generateBody";
 import "./init";
-import {getCreepCount, getCreeps, hasCreeps, processSpawnRequests, registerSpawnRequest} from "./spawnManagers";
+import {getCreepCount, getCreeps, hasCreeps, processSpawnRequests, registerSpawnRequest} from "./spawnRequests";
 import {setTimer, setTimerCycle, spawnTimerCheck} from "./spawnTimers";
 
-export const $ = {
+$ = {
   generateBody,
   getCreepCount,
   getCreeps,

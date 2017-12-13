@@ -1,3 +1,0 @@
-interface RoomMemory {
-    prospectingComplete: boolean;
-}

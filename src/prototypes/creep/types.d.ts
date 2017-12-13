@@ -4,6 +4,10 @@ interface Creep {
 }
 
 declare const enum HaulState {
-  Filling,
-  Emptying
+  Filling = 1,
+  Emptying = 2
+}
+
+interface CreepMemory {
+  state: number;
 }

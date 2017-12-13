@@ -1,4 +1,4 @@
-export function generateBody(room: Room, segment: BodyPartConstant[], opts: GenerateOptions = {}): BodyPartConstant[] {
+export function generateBody(room: Room, segment: BodyPartConstant[], opts: BodyConfig = {}): BodyPartConstant[] {
     const numberOfSegments = segmentsRequired(room, segment, opts);
     const segments = new Array(numberOfSegments).fill(segment);
     if (opts.additionalSegment) {
@@ -10,12 +10,12 @@ export function generateBody(room: Room, segment: BodyPartConstant[], opts: Gene
     return _.sortBy(_.flatten(segments), (part: string) => sortOrder[part] || sortOrder.other || 99);
 }
 
-function segmentsRequired(room: Room, segment: BodyPartConstant[], opts: GenerateOptions): number {
+function segmentsRequired(room: Room, segment: BodyPartConstant[], opts: BodyConfig): number {
 
     return Math.min(maxSegmentsByCost(room, segment, opts), maxSegmentsBySize(segment, opts));
 }
 
-function maxSegmentsByCost(room: Room, segment: BodyPartConstant[], opts: GenerateOptions) {
+function maxSegmentsByCost(room: Room, segment: BodyPartConstant[], opts: BodyConfig) {
     let maxCost = opts.maxCost && opts.maxCost <= room.energyCapacityAvailable ?
         opts.maxCost : room.energyCapacityAvailable;
 
@@ -24,7 +24,7 @@ function maxSegmentsByCost(room: Room, segment: BodyPartConstant[], opts: Genera
     return Math.floor(maxCost / _.sum(segment, getPartCost));
 }
 
-function maxSegmentsBySize(segment: string[], opts: GenerateOptions): number {
+function maxSegmentsBySize(segment: string[], opts: BodyConfig): number {
     let maxSize = opts.maxSize && opts.maxSize <= MAX_CREEP_SIZE ? opts.maxSize : MAX_CREEP_SIZE;
     maxSize = opts.additionalSegment ? maxSize - opts.additionalSegment.length : maxSize;
 

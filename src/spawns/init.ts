@@ -1,4 +1,4 @@
-import {getCreeps} from "./spawnManagers";
+import {getCreeps} from "./spawnRequests";
 
 Memory.__spawn = Memory.__spawn || {};
 

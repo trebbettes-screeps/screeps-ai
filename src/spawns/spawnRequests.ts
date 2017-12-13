@@ -29,41 +29,41 @@ function spawnCycle(room: Room, spawns: Spawn[], managers: {[id: string]: SpawnR
     }
 }
 
-function trySpawnAttempt(managerId: string, manager: SpawnRequester, room: Room, spawn: Spawn): boolean {
+function trySpawnAttempt(taskId: string, manager: SpawnRequester, room: Room, spawn: Spawn): boolean {
     try {
-        return spawnAttempt(managerId, manager, room, spawn);
+        return spawnAttempt(taskId, manager, room, spawn);
     } catch (e) {
-        console.log(`screeps-spawn: Unexpected spawn failure: ${room.name} | ${managerId}`);
+        console.log(`screeps-spawn: Unexpected spawn failure: ${room.name} | ${taskId}`);
         console.log(JSON.stringify(e.stack, null, 4));
         return false;
     }
 }
 
-function spawnAttempt(managerId: string, manager: SpawnRequester, room: Room, spawn: Spawn): boolean {
-    if (!manager.shouldSpawn(managerId, room)) {
+function spawnAttempt(taskId: string, manager: SpawnRequester, room: Room, spawn: Spawn): boolean {
+    if (!manager.shouldSpawn(taskId, room)) {
 
         return false; // Early
     }
 
-    if (!manager.canSpawn(managerId, room)) {
+    if (!manager.canSpawn(taskId, room)) {
 
         return room.energyAvailable !== room.energyCapacityAvailable; // Early
     }
 
-    const request = manager.generateSpawnRequest(managerId, room);
-    const name = request.name || `${managerId}_${Math.random().toString(36).slice(2, 6)}`;
+    const request = manager.generateSpawnRequest(taskId, room);
+    const name = request.name || `${taskId}_${Math.random().toString(36).slice(2, 6)}`;
     const memory = request.memory || {};
-    _.defaults(memory, {origin: room.name});
+    _.defaults(memory, {origin: room.name, taskId} as CreepMemory);
 
     const spawnResult = spawn.spawnCreep(request.body, name, {memory});
     if (spawnResult === OK) {
         if (request.onSuccess) {
-            request.onSuccess(managerId, name);
+            request.onSuccess(taskId, name);
         }
-        registerCreep(managerId, name);
+        registerCreep(taskId, name);
         return true;
     }
-    console.log(`screeps-spawn: Unexpected spawn failure: ${room.name} | ${managerId} | ${errors[spawnResult]}`);
+    console.log(`screeps-spawn: Unexpected spawn failure: ${room.name} | ${taskId} | ${errors[spawnResult]}`);
     return false;
 }
 
